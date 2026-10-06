@@ -5,10 +5,32 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'rewrite-thank-you',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            if (req.url === '/thank-you') {
+              req.url = '/thank-you/';
+            }
+            next();
+          });
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+      },
+    },
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          thankYou: path.resolve(__dirname, 'thank-you/index.html'),
+        },
       },
     },
     server: {

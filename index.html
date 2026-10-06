@@ -104,7 +104,7 @@
     });
     setTimeout(loadPixel, 7000);
     }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '2267605403809678');
+    fbq('init', '1763310261559804');
     fbq('track', 'PageView');
   </script>
   <!-- End Meta Pixel Code -->
@@ -2709,7 +2709,7 @@
 <body>
   <!-- Meta Pixel noscript fallback -->
   <noscript><img height="1" width="1" style="display:none" alt=""
-  src="https://www.facebook.com/tr?id=2267605403809678&ev=PageView&noscript=1"
+  src="https://www.facebook.com/tr?id=1763310261559804&ev=PageView&noscript=1"
   /></noscript>
 
   <!-- ========================================================================
@@ -2943,6 +2943,7 @@
             <input type="hidden" name="_subject" value="New Enquiry - Brigade Granada (VIP Pre-Launch Access)">
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_next" value="/thank-you">
             <input type="hidden" name="source_intent" value="Hero Unlock VIP Pre-Launch Pricing">
             <input type="text" name="_honey" style="display:none !important; visibility:hidden !important;" tabindex="-1" autocomplete="off" aria-hidden="true">
 
@@ -3728,6 +3729,7 @@
           <input type="hidden" name="_subject" id="popup-form-subject" value="New Lead - Brigade Granada (VIP Pre-Launch Access)">
           <input type="hidden" name="_captcha" value="false">
           <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_next" value="/thank-you">
           <input type="hidden" name="source_intent" id="popup-source-intent" value="Unlock VIP Pre-Launch Pricing">
           <input type="text" name="_honey" style="display:none !important; visibility:hidden !important;" tabindex="-1" autocomplete="off" aria-hidden="true">
 
@@ -3974,6 +3976,7 @@
         }
 
         const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : '<span>Unlock Price Sheet & Brochure</span>';
         if (submitBtn) {
           submitBtn.disabled = true;
           submitBtn.innerHTML = '<span>Processing...</span>';
@@ -3993,6 +3996,7 @@
           });
 
           if (response.ok) {
+            // Confirmed successful submission: fire conversion & redirect to /thank-you
             if (typeof fbq === 'function') {
               fbq('track', 'Lead');
             }
@@ -4000,21 +4004,24 @@
             if (successBox) {
               successBox.style.display = 'block';
             }
+            // Dedicated Thank You page redirect
+            setTimeout(function () {
+              window.location.href = '/thank-you';
+            }, 300);
           } else {
-            if (typeof fbq === 'function') {
-              fbq('track', 'Lead');
+            console.error('Form submission returned error status:', response.status);
+            showError('Submission could not be completed. Please call us directly at +91 8217873708.', phoneInput);
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalBtnText;
             }
-            // Fallback: standard submit if ajax endpoint fails
-            form.submit();
           }
         } catch (error) {
-          if (typeof fbq === 'function') {
-            fbq('track', 'Lead');
-          }
-          console.warn('Network submission fallback applied:', error);
-          form.style.display = 'none';
-          if (successBox) {
-            successBox.style.display = 'block';
+          console.warn('Network submission error:', error);
+          showError('Unable to connect. Please check your connection or call +91 8217873708.', phoneInput);
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
           }
         }
       });
