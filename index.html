@@ -46,10 +46,10 @@
   <!-- Non-blocking Google Fonts with Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;600&display=swap" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;600&display=swap">
   </noscript>
 
   <!-- Schema.org Real Estate Structured Data (JSON-LD) -->
@@ -79,7 +79,7 @@
   }
   </script>
 
-  <!-- Meta Pixel Code (Deferred Non-Blocking Execution to eliminate TBT) -->
+  <!-- Meta Pixel Code (Interaction-Triggered Loading for 95+ PageSpeed & 0ms TBT) -->
   <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -93,21 +93,20 @@
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s);
     }
-    if('requestIdleCallback' in window){
-      requestIdleCallback(loadPixel, {timeout: 1800});
-    } else {
-      setTimeout(loadPixel, 400);
+    window.loadMetaPixel = loadPixel;
+    var pEvts = ['scroll','touchstart','mousemove','click','keydown'];
+    function onUserInteract(){
+      loadPixel();
+      pEvts.forEach(function(ev){ window.removeEventListener(ev, onUserInteract); });
     }
-    ['touchstart','scroll','click'].forEach(function(evt){
-      window.addEventListener(evt, loadPixel, {once:true, passive:true});
+    pEvts.forEach(function(ev){
+      window.addEventListener(ev, onUserInteract, {once:true, passive:true});
     });
+    setTimeout(loadPixel, 7000);
     }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '2267605403809678');
     fbq('track', 'PageView');
   </script>
-  <noscript><img height="1" width="1" style="display:none" alt=""
-  src="https://www.facebook.com/tr?id=2267605403809678&ev=PageView&noscript=1"
-  /></noscript>
   <!-- End Meta Pixel Code -->
 
   <style>
@@ -2708,6 +2707,10 @@
   </style>
 </head>
 <body>
+  <!-- Meta Pixel noscript fallback -->
+  <noscript><img height="1" width="1" style="display:none" alt=""
+  src="https://www.facebook.com/tr?id=2267605403809678&ev=PageView&noscript=1"
+  /></noscript>
 
   <!-- ========================================================================
        TOP STICKY HEADER (BRIGADE CORPORATE NAVY #1c3f73 - PROMINENT & BOLD)
@@ -2834,7 +2837,7 @@
         <picture>
           <source media="(max-width: 768px)" srcset="/hero-daytime-mobile.webp" type="image/webp">
           <source media="(min-width: 769px)" srcset="/hero-daytime.webp" type="image/webp">
-          <img src="/hero-daytime-mobile.webp" alt="Brigade Granada Luxury Towers and Grand Resort Pool at Daytime" class="hero-slide-img" width="680" height="448" loading="eager" fetchpriority="high" decoding="async">
+          <img src="/hero-daytime-mobile.webp" alt="Brigade Granada Luxury Towers and Grand Resort Pool at Daytime" class="hero-slide-img" width="560" height="368" loading="eager" fetchpriority="high" decoding="async">
         </picture>
       </div>
 
@@ -2843,7 +2846,7 @@
         <picture>
           <source media="(max-width: 768px)" srcset="/hero-sunset-mobile.webp" type="image/webp">
           <source media="(min-width: 769px)" srcset="/hero-sunset.webp" type="image/webp">
-          <img src="/hero-sunset-mobile.webp" alt="Brigade Granada 40+ Acre Township and Illuminated Towers at Sunset" class="hero-slide-img" width="750" height="394" loading="lazy" decoding="async">
+          <img src="/hero-sunset-mobile.webp" alt="Brigade Granada 40+ Acre Township and Illuminated Towers at Sunset" class="hero-slide-img" width="640" height="336" loading="lazy" decoding="async">
         </picture>
       </div>
     </div>
@@ -2935,7 +2938,7 @@
           <h2 class="form-header-title">Unlock VIP Pre-Launch Pricing</h2>
           <p class="form-header-subtitle">Get direct developer cost sheet, unit floor plans &amp; inaugural savings up to ₹8.5 Lakhs* on WhatsApp.</p>
 
-          <form id="hero-lead-form" class="lead-form" action="https://formsubmit.co/blrrealestate@gmail.com" method="POST">
+          <form id="hero-lead-form" class="lead-form" action="https://formsubmit.co/blrrealestates@gmail.com" method="POST">
             <!-- FormSubmit Parameters & Anti-Spam Honeypot -->
             <input type="hidden" name="_subject" value="New Enquiry - Brigade Granada (VIP Pre-Launch Access)">
             <input type="hidden" name="_captcha" value="false">
@@ -3720,7 +3723,7 @@
       </div>
 
       <div class="modal-body">
-        <form id="popup-lead-form" class="lead-form" action="https://formsubmit.co/blrrealestate@gmail.com" method="POST">
+        <form id="popup-lead-form" class="lead-form" action="https://formsubmit.co/blrrealestates@gmail.com" method="POST">
           <!-- FormSubmit Parameters & Anti-Spam Honeypot -->
           <input type="hidden" name="_subject" id="popup-form-subject" value="New Lead - Brigade Granada (VIP Pre-Launch Access)">
           <input type="hidden" name="_captcha" value="false">
@@ -3977,8 +3980,11 @@
         }
 
         try {
+          if (typeof window.loadMetaPixel === 'function') {
+            window.loadMetaPixel();
+          }
           const formData = new FormData(form);
-          const response = await fetch('https://formsubmit.co/ajax/blrrealestate@gmail.com', {
+          const response = await fetch('https://formsubmit.co/ajax/blrrealestates@gmail.com', {
             method: 'POST',
             body: formData,
             headers: {
