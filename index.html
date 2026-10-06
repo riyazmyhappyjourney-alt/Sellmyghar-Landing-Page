@@ -79,31 +79,17 @@
   }
   </script>
 
-  <!-- Meta Pixel Code (Interaction-Triggered Loading for 95+ PageSpeed & 0ms TBT) -->
+  <!-- Meta Pixel Code (Standard Direct Loading for 100% Meta Events Manager & Pixel Helper Detection) -->
   <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
     if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];
-    function loadPixel(){
-      if(window._fbqLoaded)return;
-      window._fbqLoaded=true;
-      t=b.createElement(e);t.async=!0;t.defer=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s);
-    }
-    window.loadMetaPixel = loadPixel;
-    var pEvts = ['scroll','touchstart','mousemove','click','keydown'];
-    function onUserInteract(){
-      loadPixel();
-      pEvts.forEach(function(ev){ window.removeEventListener(ev, onUserInteract); });
-    }
-    pEvts.forEach(function(ev){
-      window.addEventListener(ev, onUserInteract, {once:true, passive:true});
-    });
-    setTimeout(loadPixel, 7000);
-    }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '2267605403809678');
     fbq('init', '1763310261559804');
     fbq('track', 'PageView');
   </script>
@@ -2707,10 +2693,11 @@
   </style>
 </head>
 <body>
-  <!-- Meta Pixel noscript fallback -->
-  <noscript><img height="1" width="1" style="display:none" alt=""
-  src="https://www.facebook.com/tr?id=1763310261559804&ev=PageView&noscript=1"
-  /></noscript>
+  <!-- Meta Pixel noscript fallback (Both Active Pixels) -->
+  <noscript>
+    <img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=2267605403809678&ev=PageView&noscript=1"/>
+    <img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1763310261559804&ev=PageView&noscript=1"/>
+  </noscript>
 
   <!-- ========================================================================
        TOP STICKY HEADER (BRIGADE CORPORATE NAVY #1c3f73 - PROMINENT & BOLD)
