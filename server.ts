@@ -85,6 +85,9 @@ const staticOptions = {
   }
 };
 
+// Dedicated Static Routing for Fonts and Public Assets
+app.use('/fonts', express.static(path.join(__dirname, 'public/fonts'), staticOptions));
+
 // Vite Middleware for SPA and Static Serving
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist'), staticOptions));
