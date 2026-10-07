@@ -103,12 +103,20 @@
       background: #fef2f2;
       border: 1px solid #f87171;
       color: #991b1b;
-      padding: 8px 12px;
+      padding: 10px 14px;
       font-size: 13px;
       font-weight: 600;
+      line-height: 1.45;
       border-radius: var(--radius-sm);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       text-align: left;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.12);
+    }
+
+    .form-input.input-error {
+      border-color: #ef4444 !important;
+      background-color: #fff5f5 !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
     }
 
     /* Content visibility for below-the-fold sections to maximize mobile Speed Index & FCP */
@@ -2920,10 +2928,11 @@
       <!-- Desktop Sticky Lead Form -->
       <div class="hero-sidebar-form-col">
         <div class="sticky-form-card">
+          <span class="form-header-badge" style="margin-bottom: 8px;">⚡ Get Quote in 15 Minutes !</span>
           <h2 class="form-header-title">Unlock VIP Pre-Launch Pricing</h2>
           <p class="form-header-subtitle">Get direct developer cost sheet, unit floor plans &amp; inaugural savings up to ₹8.5 Lakhs* on WhatsApp.</p>
 
-          <form id="hero-lead-form" class="lead-form" action="/api/leads" method="POST">
+          <form id="hero-lead-form" class="lead-form" action="/api/leads" method="POST" novalidate>
             <!-- Lead Parameters, Honeypot & Timing Protection -->
             <input type="hidden" name="source_intent" value="Hero Unlock VIP Pre-Launch Pricing">
             <input type="hidden" name="form_loaded_at" class="field-loaded-at" value="">
@@ -3700,13 +3709,13 @@
       <button class="modal-close-btn" onclick="closePopup()" aria-label="Close Modal">&times;</button>
       
       <div class="modal-header">
-        <span class="form-header-badge">⚡ Instant WhatsApp Delivery</span>
+        <span class="form-header-badge">⚡ Get Quote in 15 Minutes !</span>
         <h3 id="modal-heading-text" class="modal-title">Unlock VIP Pre-Launch Pricing</h3>
         <p class="modal-subtitle">Get direct developer cost sheet, unit floor plans &amp; inaugural savings up to ₹8.5 Lakhs* on WhatsApp.</p>
       </div>
 
       <div class="modal-body">
-        <form id="popup-lead-form" class="lead-form" action="/api/leads" method="POST">
+        <form id="popup-lead-form" class="lead-form" action="/api/leads" method="POST" novalidate>
           <!-- Lead Parameters, Honeypot & Timing Protection -->
           <input type="hidden" name="source_intent" id="popup-source-intent" value="Unlock VIP Pre-Launch Pricing">
           <input type="hidden" name="form_loaded_at" class="field-loaded-at" value="">
@@ -3903,18 +3912,33 @@
 
       function showError(msg, focusEl) {
         if (errorBox) {
-          errorBox.textContent = msg;
+          errorBox.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px;">' +
+            '<svg style="flex-shrink:0;margin-top:2px;color:#dc2626;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' +
+            '<span>' + msg + '</span></div>';
           errorBox.style.display = 'block';
         }
-        if (focusEl) focusEl.focus();
+        form.querySelectorAll('.form-input').forEach(el => el.classList.remove('input-error'));
+        if (focusEl) {
+          if (focusEl.classList) focusEl.classList.add('input-error');
+          focusEl.focus();
+        }
       }
 
       function clearError() {
         if (errorBox) {
-          errorBox.textContent = '';
+          errorBox.innerHTML = '';
           errorBox.style.display = 'none';
         }
+        form.querySelectorAll('.form-input').forEach(el => el.classList.remove('input-error'));
       }
+
+      // Clear field errors as soon as the user starts typing
+      form.querySelectorAll('.form-input').forEach(input => {
+        input.addEventListener('input', () => {
+          input.classList.remove('input-error');
+          clearError();
+        });
+      });
 
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -3932,32 +3956,37 @@
         const emailInput = form.querySelector('input[name="email"]');
         const phoneInput = form.querySelector('input[name="phone"]');
         const intentInput = form.querySelector('input[name="source_intent"]');
-        const honeyInput = form.querySelector('input[name="_honey"]');
         const loadedAtInput = form.querySelector('input[name="form_loaded_at"]');
+        const consentCheckbox = form.querySelector('input[type="checkbox"]');
 
         const nameVal = nameInput ? nameInput.value.replace(/[\x00-\x1F\x7F]/g, '').trim() : '';
         const emailVal = emailInput ? emailInput.value.trim() : '';
         let phoneVal = phoneInput ? phoneInput.value.trim() : '';
 
-        // 1. Client-Side Sanitization & Validation (Mirrors Server Rules)
-        if (nameVal.length < 2) {
-          showError('Please enter your full name (minimum 2 characters).', nameInput);
+        // 1. Name Validation with Exact Explanation & Correct Format Guidance
+        if (!nameVal || nameVal.length < 2) {
+          showError('Invalid Name: Please enter your full name (minimum 2 characters, e.g., Rajesh Kumar).', nameInput);
           return;
         }
         if (nameVal.length > 80) {
-          showError('Name cannot exceed 80 characters.', nameInput);
+          showError('Name Too Long: Maximum 80 characters allowed.', nameInput);
           return;
         }
         if (/\d/.test(nameVal)) {
-          showError('Name must not contain numbers.', nameInput);
+          showError('Invalid Name: Name cannot contain numbers. Correct format: letters and spaces only (e.g., Rajesh Kumar).', nameInput);
           return;
         }
         if (!/^[A-Za-z\s.'-]+$/.test(nameVal)) {
-          showError('Please enter a valid human name using letters and spaces.', nameInput);
+          showError('Invalid Name: Name cannot contain special symbols. Correct format: letters and spaces only (e.g., Rajesh Kumar).', nameInput);
           return;
         }
 
-        // Indian mobile normalization
+        // 2. Mobile Validation with Exact Explanation & Correct Format Guidance
+        if (!phoneVal) {
+          showError('Missing Phone Number: Please enter your 10-digit mobile number (e.g., 9845012345).', phoneInput);
+          return;
+        }
+
         let cleanDigits = phoneVal.replace(/\D/g, '');
         if (cleanDigits.length === 12 && cleanDigits.startsWith('91')) {
           cleanDigits = cleanDigits.slice(2);
@@ -3966,19 +3995,38 @@
         }
 
         if (cleanDigits.length !== 10 || !/^[6-9]\d{9}$/.test(cleanDigits)) {
-          showError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.', phoneInput);
+          showError('Invalid Mobile Number: Indian numbers must be exactly 10 digits starting with 6, 7, 8, or 9. Correct format: 9845012345.', phoneInput);
           return;
         }
 
-        // Fake repeated/sequential phone check
         if (/^(.)\1+$/.test(cleanDigits) || cleanDigits === '1234567890' || cleanDigits === '9876543210') {
-          showError('Please enter an active personal mobile number.', phoneInput);
+          showError('Invalid Mobile Number: Repeated or test numbers (e.g., 9999999999, 1234567890) are not accepted. Correct format: 9845012345.', phoneInput);
           return;
         }
 
+        // 3. Email Validation with Exact Explanation & Correct Format Guidance
+        if (!emailVal) {
+          showError('Missing Email: Please enter your email address (e.g., rajesh@gmail.com).', emailInput);
+          return;
+        }
+        if (!emailVal.includes('@')) {
+          showError("Invalid Email: Missing '@' symbol. Correct format: username@domain.com (e.g., rajesh@gmail.com).", emailInput);
+          return;
+        }
+        const atParts = emailVal.split('@');
+        if (atParts.length !== 2 || !atParts[0].trim() || !atParts[1].includes('.')) {
+          showError("Invalid Email: Incomplete domain. Correct format: name@example.com (e.g., rajesh@gmail.com).", emailInput);
+          return;
+        }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(emailVal) || emailVal.length > 100) {
-          showError('Please enter a valid email address (e.g. name@gmail.com).', emailInput);
+          showError('Invalid Email Format: Please provide a valid email address (e.g., rajesh@gmail.com).', emailInput);
+          return;
+        }
+
+        // 4. Authorization / Consent Checkbox
+        if (consentCheckbox && !consentCheckbox.checked) {
+          showError('Authorization Required: Please check the consent box to proceed.', consentCheckbox);
           return;
         }
 
