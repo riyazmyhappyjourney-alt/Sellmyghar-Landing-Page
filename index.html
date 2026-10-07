@@ -3833,7 +3833,6 @@
     const modalSubjectEl = document.getElementById('popup-form-subject');
 
     // 1. Auto popup on engagement (scrolling past 35% or 12s active reading, suppressed for headless audit bots)
-    let autoPopupShown = false;
     let userHasInteracted = false;
     ['scroll', 'touchstart', 'mousemove', 'keydown'].forEach(ev => {
       window.addEventListener(ev, () => { userHasInteracted = true; }, { once: true, passive: true });
