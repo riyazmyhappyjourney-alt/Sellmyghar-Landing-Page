@@ -16,10 +16,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <meta name="theme-color" content="#1c3f73">
 
-  <!-- Preconnect & Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Self-Hosted Fonts -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/montserrat-700.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-400.woff2" crossorigin>
 
   <!-- Meta Pixel Code -->
   <script>
@@ -38,6 +37,28 @@
   <!-- End Meta Pixel Code -->
 
   <style>
+    @font-face {
+      font-family: 'Montserrat';
+      font-style: normal;
+      font-weight: 700 800;
+      font-display: swap;
+      src: url('/fonts/montserrat-700.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 400 500;
+      font-display: swap;
+      src: url('/fonts/poppins-400.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 600 700;
+      font-display: swap;
+      src: url('/fonts/poppins-600.woff2') format('woff2');
+    }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
