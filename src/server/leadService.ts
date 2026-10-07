@@ -2,6 +2,7 @@ import {
   validateAndNormalizeName,
   validateAndNormalizePhone,
   validateAndNormalizeEmail,
+  validateAndNormalizeDetails,
   sanitizeTextField
 } from './validator.js';
 import { checkLeadRateLimits } from './rateLimiter.js';
@@ -12,6 +13,7 @@ export interface LeadSubmissionPayload {
   name: unknown;
   phone: unknown;
   email: unknown;
+  details?: unknown;
   source_intent?: unknown;
   _honey?: unknown;
   form_loaded_at?: unknown;
@@ -22,12 +24,13 @@ export interface ProcessLeadResult {
   statusCode: number;
   response: {
     success: boolean;
+    error?: string;
+    field?: string;
     message: string;
-    errors?: Record<string, string>;
   };
 }
 
-const ALLOWED_KEYS = new Set(['name', 'phone', 'email', 'source_intent', '_honey', 'form_loaded_at']);
+const ALLOWED_KEYS = new Set(['name', 'phone', 'email', 'details', 'source_intent', '_honey', 'form_loaded_at']);
 
 /**
  * Forwards verified lead data to the sales notification endpoint in the background
@@ -67,6 +70,7 @@ export async function processLeadSubmission(
       statusCode: 400,
       response: {
         success: false,
+        error: 'INVALID_PAYLOAD',
         message: 'Invalid request format.'
       }
     };
@@ -79,6 +83,8 @@ export async function processLeadSubmission(
         statusCode: 400,
         response: {
           success: false,
+          error: 'UNEXPECTED_FIELD',
+          field: key,
           message: 'Invalid request payload structure.'
         }
       };
@@ -90,44 +96,65 @@ export async function processLeadSubmission(
   const honeypotFilled = honeypotVal.length > 0;
 
   if (honeypotFilled) {
-    // Log suspicious bot activity securely (no personal info)
     console.warn(`[BOT BLOCKED] Honeypot triggered from IP: ${clientIp.replace(/\d+$/, 'xxx')}`);
-    // Return standard success message so the bot does not adapt
     return {
       statusCode: 200,
       response: {
         success: true,
-        message: 'Thank you. Your enquiry has been received successfully. Our team will contact you shortly.'
+        message: 'Thank you. Your enquiry has been received. Our team will contact you shortly.'
       }
     };
   }
 
   // 3. Field Normalization & Strict Server-side Validation
-  const errors: Record<string, string> = {};
-
   const nameResult = validateAndNormalizeName(body.name);
   if (!nameResult.isValid) {
-    errors.name = nameResult.errorMessage || 'Please enter a valid full name.';
-  }
-
-  const phoneResult = validateAndNormalizePhone(body.phone);
-  if (!phoneResult.isValid) {
-    errors.phone = phoneResult.errorMessage || 'Please enter a valid 10-digit Indian mobile number.';
-  }
-
-  const emailResult = validateAndNormalizeEmail(body.email);
-  if (!emailResult.isValid) {
-    errors.email = emailResult.errorMessage || 'Please enter a valid email address.';
-  }
-
-  // If any validation failed, return controlled generic error response
-  if (Object.keys(errors).length > 0) {
     return {
       statusCode: 422,
       response: {
         success: false,
-        message: Object.values(errors)[0],
-        errors
+        error: 'VALIDATION_ERROR',
+        field: 'name',
+        message: nameResult.errorMessage || 'Name must contain letters and spaces only.'
+      }
+    };
+  }
+
+  const phoneResult = validateAndNormalizePhone(body.phone);
+  if (!phoneResult.isValid) {
+    return {
+      statusCode: 422,
+      response: {
+        success: false,
+        error: 'VALIDATION_ERROR',
+        field: 'phone',
+        message: phoneResult.errorMessage || 'Please enter a valid 10 digit Indian mobile number.'
+      }
+    };
+  }
+
+  const emailResult = validateAndNormalizeEmail(body.email);
+  if (!emailResult.isValid) {
+    return {
+      statusCode: 422,
+      response: {
+        success: false,
+        error: 'VALIDATION_ERROR',
+        field: 'email',
+        message: emailResult.errorMessage || 'Please enter a valid email address.'
+      }
+    };
+  }
+
+  const detailsResult = validateAndNormalizeDetails(body.details, false);
+  if (!detailsResult.isValid) {
+    return {
+      statusCode: 422,
+      response: {
+        success: false,
+        error: 'VALIDATION_ERROR',
+        field: 'details',
+        message: detailsResult.errorMessage || 'Please enter at least 5 characters for requirements.'
       }
     };
   }
@@ -144,6 +171,7 @@ export async function processLeadSubmission(
       statusCode: 429,
       response: {
         success: false,
+        error: 'RATE_LIMITED',
         message: 'Too many requests. Please try again later.'
       }
     };
@@ -210,12 +238,12 @@ export async function processLeadSubmission(
     }
   }
 
-  // 10. Clean, professional response (does not reveal duplicate status, internal score, or lead ID)
+  // 10. Clean, professional JSON response
   return {
     statusCode: 200,
     response: {
       success: true,
-      message: 'Thank you. Your enquiry has been received successfully. Our team will contact you shortly.'
+      message: 'Lead submitted successfully'
     }
   };
 }

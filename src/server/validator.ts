@@ -13,10 +13,10 @@ const SEQUENTIAL_FAKE_PHONES = new Set([
 
 // Common fake / junk names
 const SPAM_NAMES = new Set([
-  'test', 'testing', 'tester', 'asdf', 'asdfgh', 'qwerty', 'abc', 'abcd',
-  'aaaa', 'aaaaa', 'aaaaaa', 'aaaaaaa', 'xxxxx', 'xxxxxx', '123456',
-  '9876543210', 'admin', 'user', 'fake', 'junk', 'demo', 'sample', 'none',
-  'null', 'undefined', 'anonymous', 'unknown', 'name', 'your name'
+  'test', 'testing', 'tester', 'test123', 'john123', 'asdf', 'asdfgh', 'qwerty',
+  'qwerty123', 'abc', 'abcd', 'aaaa', 'aaaaa', 'aaaaaa', 'aaaaaaa', 'xxxxx',
+  'xxxxxx', '123456', '9876543210', 'admin', 'user', 'fake', 'junk', 'demo',
+  'sample', 'none', 'null', 'undefined', 'anonymous', 'unknown', 'name', 'your name'
 ]);
 
 // SQL Injection and Script pattern heuristics
@@ -34,6 +34,7 @@ const URL_PATTERN = /(https?:\/\/|www\.|\.com\b|\.in\b|\.org\b|\.net\b|\.io\b|\.
 
 export interface ValidationResult {
   isValid: boolean;
+  field?: string;
   errorMessage?: string;
   normalizedValue?: string;
   isSpamSignal?: boolean;
@@ -41,10 +42,12 @@ export interface ValidationResult {
 
 /**
  * Normalizes and validates Indian Human Names
+ * Min: 2, Max: 60 characters
+ * Letters and spaces only (plus legitimate dots, hyphens, apostrophes for names)
  */
 export function validateAndNormalizeName(rawName: unknown): ValidationResult {
   if (typeof rawName !== 'string') {
-    return { isValid: false, errorMessage: 'Name is required and must be text.' };
+    return { isValid: false, field: 'name', errorMessage: 'Name is required and must be text.' };
   }
 
   // 1. Strip dangerous control characters and trim
@@ -53,57 +56,57 @@ export function validateAndNormalizeName(rawName: unknown): ValidationResult {
   // 2. Collapse repeated whitespace
   name = name.replace(/\s+/g, ' ');
 
-  // 3. Length checks (2 to 80 characters)
+  // 3. Length checks (2 to 60 characters strict)
   if (name.length < 2) {
-    return { isValid: false, errorMessage: 'Please enter your full name (minimum 2 characters).' };
+    return { isValid: false, field: 'name', errorMessage: 'Name must be at least 2 characters.' };
   }
-  if (name.length > 80) {
-    return { isValid: false, errorMessage: 'Name cannot exceed 80 characters.' };
+  if (name.length > 60) {
+    return { isValid: false, field: 'name', errorMessage: 'Name cannot exceed 60 characters.' };
   }
 
   // 4. Reject numbers
   if (/\d/.test(name)) {
-    return { isValid: false, errorMessage: 'Name must not contain numbers.' };
+    return { isValid: false, field: 'name', errorMessage: 'Name must contain letters and spaces only.' };
   }
 
   // 5. Reject URLs
   if (URL_PATTERN.test(name)) {
-    return { isValid: false, errorMessage: 'Name must not contain web links.' };
+    return { isValid: false, field: 'name', errorMessage: 'Name must not contain web links.' };
   }
 
   // 6. Reject injection payloads
   for (const pattern of INJECTION_PATTERNS) {
     if (pattern.test(name)) {
-      return { isValid: false, errorMessage: 'Invalid characters in name.', isSpamSignal: true };
+      return { isValid: false, field: 'name', errorMessage: 'Invalid characters in name.', isSpamSignal: true };
     }
   }
 
   // 7. Check for obvious spam strings
   const lowerName = name.toLowerCase();
   if (SPAM_NAMES.has(lowerName)) {
-    return { isValid: false, errorMessage: 'Please enter a genuine name.', isSpamSignal: true };
+    return { isValid: false, field: 'name', errorMessage: 'Please enter a genuine human name.', isSpamSignal: true };
   }
 
   // Reject single repeated character (e.g., "aaaaa", "zzzzz")
   if (/^(.)\1+$/i.test(name.replace(/\s/g, ''))) {
-    return { isValid: false, errorMessage: 'Please enter a genuine name.', isSpamSignal: true };
+    return { isValid: false, field: 'name', errorMessage: 'Please enter a genuine human name.', isSpamSignal: true };
   }
 
   // 8. Allowed character set for Indian names:
   // Supports letters, spaces, dots, single quotes/apostrophes, hyphens
-  // Examples: "Ramesh Kumar", "Dr. Suresh", "Priya S.", "Mary-Anne", "D'Souza", "K. R. Rao"
+  // Examples: "Rahul Sharma", "Riyaz Mohammed", "Ananya Rao", "Mohammed Sameer", "Dr. Suresh", "D'Souza"
   const nameCharRegex = /^[A-Za-z\s.'-]+$/;
   if (!nameCharRegex.test(name)) {
-    return { isValid: false, errorMessage: 'Name contains invalid characters. Use letters and spaces only.' };
+    return { isValid: false, field: 'name', errorMessage: 'Name must contain letters and spaces only.' };
   }
 
   // Must contain at least 2 alphabetic characters
   const letterCount = (name.match(/[A-Za-z]/g) || []).length;
   if (letterCount < 2) {
-    return { isValid: false, errorMessage: 'Please enter a valid human name.' };
+    return { isValid: false, field: 'name', errorMessage: 'Please enter a valid human name.' };
   }
 
-  return { isValid: true, normalizedValue: name };
+  return { isValid: true, field: 'name', normalizedValue: name };
 }
 
 /**
@@ -113,7 +116,7 @@ export function validateAndNormalizeName(rawName: unknown): ValidationResult {
  */
 export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
   if (typeof rawPhone !== 'string' && typeof rawPhone !== 'number') {
-    return { isValid: false, errorMessage: 'Mobile number is required.' };
+    return { isValid: false, field: 'phone', errorMessage: 'Mobile number is required.' };
   }
 
   const str = String(rawPhone).trim();
@@ -122,12 +125,9 @@ export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
   let digits = str.replace(/\D/g, '');
 
   // Normalize Indian Country Code prefixes
-  // If user passed +91 9876543210 -> 12 digits starting with 91
   if (digits.length === 12 && digits.startsWith('91')) {
     digits = digits.slice(2);
-  }
-  // If user passed leading 0 (e.g. 09876543210) -> 11 digits
-  else if (digits.length === 11 && digits.startsWith('0')) {
+  } else if (digits.length === 11 && digits.startsWith('0')) {
     digits = digits.slice(1);
   }
 
@@ -135,7 +135,8 @@ export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
   if (digits.length !== 10) {
     return {
       isValid: false,
-      errorMessage: 'Please enter a valid 10-digit Indian mobile number.'
+      field: 'phone',
+      errorMessage: 'Please enter a valid 10 digit Indian mobile number.'
     };
   }
 
@@ -143,7 +144,8 @@ export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
   if (!/^[6-9]/.test(digits)) {
     return {
       isValid: false,
-      errorMessage: 'Indian mobile numbers must start with 6, 7, 8, or 9.'
+      field: 'phone',
+      errorMessage: 'Please enter a valid 10 digit Indian mobile number.'
     };
   }
 
@@ -151,7 +153,8 @@ export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
   if (REPEATED_FAKE_PHONES.has(digits)) {
     return {
       isValid: false,
-      errorMessage: 'Please enter an active mobile number.',
+      field: 'phone',
+      errorMessage: 'Please enter a valid active mobile number.',
       isSpamSignal: true
     };
   }
@@ -160,12 +163,13 @@ export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
   if (SEQUENTIAL_FAKE_PHONES.has(digits)) {
     return {
       isValid: false,
-      errorMessage: 'Please enter a valid personal mobile number.',
+      field: 'phone',
+      errorMessage: 'Please enter a valid active mobile number.',
       isSpamSignal: true
     };
   }
 
-  return { isValid: true, normalizedValue: digits };
+  return { isValid: true, field: 'phone', normalizedValue: digits };
 }
 
 /**
@@ -173,41 +177,88 @@ export function validateAndNormalizePhone(rawPhone: unknown): ValidationResult {
  */
 export function validateAndNormalizeEmail(rawEmail: unknown): ValidationResult {
   if (typeof rawEmail !== 'string') {
-    return { isValid: false, errorMessage: 'Email address is required.' };
+    return { isValid: false, field: 'email', errorMessage: 'Email address is required.' };
   }
 
   let email = rawEmail.trim();
 
   if (email.length < 5 || email.length > 100) {
-    return { isValid: false, errorMessage: 'Please enter a valid email address.' };
+    return { isValid: false, field: 'email', errorMessage: 'Please enter a valid email address.' };
   }
 
-  // Reject spaces, dangerous characters, or multiple @
+  // Reject spaces or multiple @
   if (/\s/.test(email) || (email.match(/@/g) || []).length !== 1) {
-    return { isValid: false, errorMessage: 'Please enter a valid email format.' };
+    return { isValid: false, field: 'email', errorMessage: 'Please enter a valid email address.' };
+  }
+
+  // Reject double dots like abc..xyz@gmail.com
+  if (email.includes('..')) {
+    return { isValid: false, field: 'email', errorMessage: 'Please enter a valid email address.' };
   }
 
   // Injection and control char check
   for (const pattern of INJECTION_PATTERNS) {
     if (pattern.test(email)) {
-      return { isValid: false, errorMessage: 'Invalid characters in email address.', isSpamSignal: true };
+      return { isValid: false, field: 'email', errorMessage: 'Invalid characters in email address.', isSpamSignal: true };
     }
   }
 
-  // RFC compliant standard email format
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-  if (!emailRegex.test(email)) {
-    return { isValid: false, errorMessage: 'Please enter a valid email address (e.g., name@gmail.com).' };
+  // Split user and domain
+  const [localPart, domainPart] = email.split('@');
+  if (!localPart || !domainPart || !domainPart.includes('.')) {
+    return { isValid: false, field: 'email', errorMessage: 'Please enter a valid email address.' };
   }
 
-  // Normalize: lower-case the domain part, trim
-  const [localPart, domainPart] = email.split('@');
-  if (!domainPart || !domainPart.includes('.')) {
-    return { isValid: false, errorMessage: 'Please enter a valid email domain.' };
+  // Domain must have at least 2 chars in TLD
+  const domainParts = domainPart.split('.');
+  const tld = domainParts[domainParts.length - 1];
+  if (!tld || tld.length < 2) {
+    return { isValid: false, field: 'email', errorMessage: 'Please enter a valid email address.' };
+  }
+
+  // Strict email regex
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  if (!emailRegex.test(email)) {
+    return { isValid: false, field: 'email', errorMessage: 'Please enter a valid email address.' };
   }
 
   const normalized = `${localPart.trim()}@${domainPart.toLowerCase().trim()}`;
-  return { isValid: true, normalizedValue: normalized };
+  return { isValid: true, field: 'email', normalizedValue: normalized };
+}
+
+/**
+ * Validates details / message / requirement field if present
+ * Min: 5, Max: 500 characters
+ */
+export function validateAndNormalizeDetails(rawDetails: unknown, required = false): ValidationResult {
+  if (rawDetails === undefined || rawDetails === null || rawDetails === '') {
+    if (required) {
+      return { isValid: false, field: 'details', errorMessage: 'Please enter at least 5 characters.' };
+    }
+    return { isValid: true, field: 'details', normalizedValue: '' };
+  }
+
+  if (typeof rawDetails !== 'string') {
+    return { isValid: false, field: 'details', errorMessage: 'Details must be text.' };
+  }
+
+  const details = rawDetails.replace(/[\x00-\x1F\x7F]/g, '').trim();
+
+  if (required && details.length < 5) {
+    return { isValid: false, field: 'details', errorMessage: 'Please enter at least 5 characters.' };
+  }
+
+  if (details.length > 500) {
+    return { isValid: false, field: 'details', errorMessage: 'Details cannot exceed 500 characters.' };
+  }
+
+  for (const pattern of INJECTION_PATTERNS) {
+    if (pattern.test(details)) {
+      return { isValid: false, field: 'details', errorMessage: 'Invalid characters in details.', isSpamSignal: true };
+    }
+  }
+
+  return { isValid: true, field: 'details', normalizedValue: details };
 }
 
 /**

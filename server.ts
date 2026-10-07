@@ -59,10 +59,16 @@ app.post('/api/leads', async (req: Request, res: Response) => {
   }
 });
 
-// Reject unsupported HTTP methods on lead endpoint
+// Browser navigation safety: If a user ever visits GET /api/leads directly in browser, redirect to home
+app.get('/api/leads', (_req: Request, res: Response) => {
+  res.redirect(302, '/');
+});
+
+// Reject unsupported HTTP methods on lead endpoint with JSON
 app.all('/api/leads', (_req: Request, res: Response) => {
   res.status(405).json({
     success: false,
+    error: 'METHOD_NOT_ALLOWED',
     message: 'Method Not Allowed'
   });
 });

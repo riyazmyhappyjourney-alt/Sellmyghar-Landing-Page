@@ -2932,7 +2932,7 @@
           <h2 class="form-header-title">Unlock VIP Pre-Launch Pricing</h2>
           <p class="form-header-subtitle">Get direct developer cost sheet, unit floor plans &amp; inaugural savings up to ₹8.5 Lakhs* on WhatsApp.</p>
 
-          <form id="hero-lead-form" class="lead-form" action="/api/leads" method="POST" novalidate>
+          <form id="hero-lead-form" class="lead-form" onsubmit="event.preventDefault(); return false;" novalidate>
             <!-- Lead Parameters, Honeypot & Timing Protection -->
             <input type="hidden" name="source_intent" value="Hero Unlock VIP Pre-Launch Pricing">
             <input type="hidden" name="form_loaded_at" class="field-loaded-at" value="">
@@ -2941,13 +2941,13 @@
             <div id="hero-form-error" class="form-error-banner" style="display:none;"></div>
 
             <div>
-              <input type="text" name="name" class="form-input" placeholder="Your Full Name" autocomplete="name" required>
+              <input type="text" name="name" class="form-input" placeholder="Your Full Name" maxlength="60" minlength="2" autocomplete="name" required>
             </div>
             <div>
-              <input type="tel" name="phone" class="form-input" placeholder="Mobile Number (10 digits)" pattern="[6-9][0-9]{9}" maxlength="10" autocomplete="tel" required>
+              <input type="tel" name="phone" class="form-input" placeholder="Mobile Number (10 digits)" maxlength="10" autocomplete="tel" required>
             </div>
             <div>
-              <input type="email" name="email" class="form-input" placeholder="Email Address" autocomplete="email" required>
+              <input type="email" name="email" class="form-input" placeholder="Email Address" maxlength="100" autocomplete="email" required>
             </div>
 
             <div class="consent-wrapper">
@@ -3715,7 +3715,7 @@
       </div>
 
       <div class="modal-body">
-        <form id="popup-lead-form" class="lead-form" action="/api/leads" method="POST" novalidate>
+        <form id="popup-lead-form" class="lead-form" onsubmit="event.preventDefault(); return false;" novalidate>
           <!-- Lead Parameters, Honeypot & Timing Protection -->
           <input type="hidden" name="source_intent" id="popup-source-intent" value="Unlock VIP Pre-Launch Pricing">
           <input type="hidden" name="form_loaded_at" class="field-loaded-at" value="">
@@ -3724,13 +3724,13 @@
           <div id="popup-form-error" class="form-error-banner" style="display:none;"></div>
 
           <div>
-            <input type="text" name="name" class="form-input" placeholder="Enter Full Name" autocomplete="name" required>
+            <input type="text" name="name" class="form-input" placeholder="Enter Full Name" maxlength="60" minlength="2" autocomplete="name" required>
           </div>
           <div>
-            <input type="email" name="email" class="form-input" placeholder="Enter Email" autocomplete="email" required>
+            <input type="email" name="email" class="form-input" placeholder="Enter Email" maxlength="100" autocomplete="email" required>
           </div>
           <div>
-            <input type="tel" name="phone" class="form-input" placeholder="Enter Phone Number (10 digits)" pattern="[6-9][0-9]{9}" maxlength="10" autocomplete="tel" required>
+            <input type="tel" name="phone" class="form-input" placeholder="Enter Phone Number (10 digits)" maxlength="10" autocomplete="tel" required>
           </div>
 
           <div class="consent-wrapper">
@@ -3941,7 +3941,10 @@
       });
 
       form.addEventListener('submit', async function (e) {
-        e.preventDefault();
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         clearError();
 
         // Anti-spam honeypot detection
@@ -3963,27 +3966,34 @@
         const emailVal = emailInput ? emailInput.value.trim() : '';
         let phoneVal = phoneInput ? phoneInput.value.trim() : '';
 
-        // 1. Name Validation with Exact Explanation & Correct Format Guidance
+        // 1. Name Field Validation (Min 2, Max 60, Letters & Spaces only)
         if (!nameVal || nameVal.length < 2) {
-          showError('Invalid Name: Please enter your full name (minimum 2 characters, e.g., Rajesh Kumar).', nameInput);
+          showError('Please enter your full name (minimum 2 characters).', nameInput);
           return;
         }
-        if (nameVal.length > 80) {
-          showError('Name Too Long: Maximum 80 characters allowed.', nameInput);
+        if (nameVal.length > 60) {
+          showError('Name cannot exceed 60 characters.', nameInput);
           return;
         }
         if (/\d/.test(nameVal)) {
-          showError('Invalid Name: Name cannot contain numbers. Correct format: letters and spaces only (e.g., Rajesh Kumar).', nameInput);
+          showError('Name must contain letters and spaces only.', nameInput);
           return;
         }
         if (!/^[A-Za-z\s.'-]+$/.test(nameVal)) {
-          showError('Invalid Name: Name cannot contain special symbols. Correct format: letters and spaces only (e.g., Rajesh Kumar).', nameInput);
+          showError('Name must contain letters and spaces only.', nameInput);
+          return;
+        }
+        // Reject spam patterns
+        const lowerName = nameVal.toLowerCase();
+        const spamNames = ['test', 'testing', 'tester', 'asdf', 'asdfgh', 'qwerty', 'abc', '123456', '9876543210'];
+        if (spamNames.includes(lowerName) || /^(.)\1+$/.test(nameVal.replace(/\s/g, ''))) {
+          showError('Please enter a genuine human name.', nameInput);
           return;
         }
 
-        // 2. Mobile Validation with Exact Explanation & Correct Format Guidance
+        // 2. Mobile Validation (Exactly 10 digits starting with 6,7,8,9)
         if (!phoneVal) {
-          showError('Missing Phone Number: Please enter your 10-digit mobile number (e.g., 9845012345).', phoneInput);
+          showError('Please enter a valid 10 digit Indian mobile number.', phoneInput);
           return;
         }
 
@@ -3995,42 +4005,52 @@
         }
 
         if (cleanDigits.length !== 10 || !/^[6-9]\d{9}$/.test(cleanDigits)) {
-          showError('Invalid Mobile Number: Indian numbers must be exactly 10 digits starting with 6, 7, 8, or 9. Correct format: 9845012345.', phoneInput);
+          showError('Please enter a valid 10 digit Indian mobile number.', phoneInput);
           return;
         }
 
-        if (/^(.)\1+$/.test(cleanDigits) || cleanDigits === '1234567890' || cleanDigits === '9876543210') {
-          showError('Invalid Mobile Number: Repeated or test numbers (e.g., 9999999999, 1234567890) are not accepted. Correct format: 9845012345.', phoneInput);
+        const fakePhones = ['0000000000', '1111111111', '2222222222', '3333333333', '4444444444',
+                            '5555555555', '6666666666', '7777777777', '8888888888', '9999999999',
+                            '1234567890', '9876543210', '0123456789', '5123456789'];
+        if (fakePhones.includes(cleanDigits) || /^(.)\1+$/.test(cleanDigits)) {
+          showError('Please enter a valid 10 digit Indian mobile number.', phoneInput);
           return;
         }
 
-        // 3. Email Validation with Exact Explanation & Correct Format Guidance
+        // 3. Email Validation (Strict format, reject invalid formats)
         if (!emailVal) {
-          showError('Missing Email: Please enter your email address (e.g., rajesh@gmail.com).', emailInput);
+          showError('Please enter a valid email address.', emailInput);
           return;
         }
-        if (!emailVal.includes('@')) {
-          showError("Invalid Email: Missing '@' symbol. Correct format: username@domain.com (e.g., rajesh@gmail.com).", emailInput);
+        if (!emailVal.includes('@') || emailVal.startsWith('@') || emailVal.endsWith('@') || emailVal.includes('..') || /\s/.test(emailVal)) {
+          showError('Please enter a valid email address.', emailInput);
           return;
         }
-        const atParts = emailVal.split('@');
-        if (atParts.length !== 2 || !atParts[0].trim() || !atParts[1].includes('.')) {
-          showError("Invalid Email: Incomplete domain. Correct format: name@example.com (e.g., rajesh@gmail.com).", emailInput);
+        const emailParts = emailVal.split('@');
+        if (emailParts.length !== 2 || !emailParts[0].trim() || !emailParts[1].includes('.')) {
+          showError('Please enter a valid email address.', emailInput);
           return;
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const domainParts = emailParts[1].split('.');
+        const tld = domainParts[domainParts.length - 1];
+        if (!tld || tld.length < 2) {
+          showError('Please enter a valid email address.', emailInput);
+          return;
+        }
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
         if (!emailRegex.test(emailVal) || emailVal.length > 100) {
-          showError('Invalid Email Format: Please provide a valid email address (e.g., rajesh@gmail.com).', emailInput);
+          showError('Please enter a valid email address.', emailInput);
           return;
         }
 
         // 4. Authorization / Consent Checkbox
         if (consentCheckbox && !consentCheckbox.checked) {
-          showError('Authorization Required: Please check the consent box to proceed.', consentCheckbox);
+          showError('Please check the authorization box to proceed.', consentCheckbox);
           return;
         }
 
-        const submitBtn = form.querySelector('button[type="submit"]');
+        // 5. Prevent Double Submission: Lock submit button immediately
+        const submitBtn = form.querySelector('button[type="submit"]') || form.querySelector('.btn-form-submit');
         const originalBtnText = submitBtn ? submitBtn.innerHTML : '<span>Unlock Price Sheet & Brochure</span>';
         if (submitBtn) {
           submitBtn.disabled = true;
@@ -4051,19 +4071,54 @@
             form_loaded_at: loadedAtInput ? loadedAtInput.value : Date.now()
           };
 
-          const response = await fetch('/api/leads', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-          });
+          let response;
+          let data = null;
 
-          const data = await response.json().catch(() => ({}));
+          try {
+            response = await fetch('/api/leads', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+            data = await response.json().catch(() => null);
+          } catch (fetchErr) {
+            console.warn('Direct API fetch notice:', fetchErr);
+          }
 
-          if (response.status === 429) {
-            showError('Too many requests. Please try again later.', phoneInput);
+          // Handle 404 fallback for static hosting deployments where backend Node server is not attached
+          if (!response || response.status === 404) {
+            try {
+              const fallbackData = new FormData();
+              fallbackData.append('name', nameVal);
+              fallbackData.append('phone', '+91 ' + cleanDigits);
+              fallbackData.append('email', emailVal);
+              fallbackData.append('source_intent', intentInput ? intentInput.value : 'Website Lead');
+              fallbackData.append('_subject', 'New Verified Lead - Brigade Granada (' + nameVal + ')');
+              fallbackData.append('_captcha', 'false');
+
+              const fallbackRes = await fetch('https://formsubmit.co/ajax/blrrealestates@gmail.com', {
+                method: 'POST',
+                body: fallbackData,
+                headers: { 'Accept': 'application/json' }
+              });
+
+              if (fallbackRes.ok) {
+                if (typeof fbq === 'function') fbq('track', 'Lead');
+                form.style.display = 'none';
+                if (successBox) successBox.style.display = 'block';
+                setTimeout(() => { window.location.href = '/thank-you'; }, 400);
+                return;
+              }
+            } catch (fallbackErr) {
+              console.warn('Fallback error:', fallbackErr);
+            }
+          }
+
+          if (response && response.status === 429) {
+            showError('Too many requests. Please try again later.');
             if (submitBtn) {
               submitBtn.disabled = false;
               submitBtn.innerHTML = originalBtnText;
@@ -4071,8 +4126,8 @@
             return;
           }
 
-          if (response.ok && data.success) {
-            // Confirmed successful submission: fire conversion & redirect to /thank-you
+          if (response && response.ok && data && data.success) {
+            // Backend confirmed lead has been successfully accepted
             if (typeof fbq === 'function') {
               fbq('track', 'Lead');
             }
@@ -4080,21 +4135,27 @@
             if (successBox) {
               successBox.style.display = 'block';
             }
-            // Dedicated Thank You page redirect
             setTimeout(function () {
               window.location.href = '/thank-you';
-            }, 300);
+            }, 350);
           } else {
-            const errorMsg = data.message || 'We could not submit your request right now. Please try again.';
-            showError(errorMsg, phoneInput);
+            // Validation or processing error: Stay on page, show exact message, preserve data
+            let targetEl = null;
+            if (data && data.field === 'name') targetEl = nameInput;
+            else if (data && data.field === 'phone') targetEl = phoneInput;
+            else if (data && data.field === 'email') targetEl = emailInput;
+
+            const errorMsg = (data && data.message) ? data.message : "We couldn't submit your enquiry right now. Please try again.";
+            showError(errorMsg, targetEl);
+
             if (submitBtn) {
               submitBtn.disabled = false;
               submitBtn.innerHTML = originalBtnText;
             }
           }
         } catch (error) {
-          console.warn('Network submission error:', error);
-          showError('Unable to connect. Please check your internet connection or call +91 8217873708.', phoneInput);
+          console.warn('Submission caught error:', error);
+          showError("We couldn't submit your enquiry right now. Please try again.");
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
