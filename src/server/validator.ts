@@ -6,9 +6,9 @@ const REPEATED_FAKE_PHONES = new Set([
   '5555555555', '6666666666', '7777777777', '8888888888', '9999999999'
 ]);
 
-// Known sequential numbers
+// Known sequential numbers that do not begin with valid Indian mobile prefixes (e.g., 1234567890)
 const SEQUENTIAL_FAKE_PHONES = new Set([
-  '1234567890', '9876543210', '0123456789', '2345678901', '8765432109'
+  '1234567890', '0123456789'
 ]);
 
 // Common fake / junk names
