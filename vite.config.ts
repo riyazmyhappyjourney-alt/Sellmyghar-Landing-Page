@@ -11,7 +11,7 @@ export default defineConfig(() => {
       {
         name: 'rewrite-thank-you',
         configureServer(server) {
-          server.middlewares.use((req, res, next) => {
+          server.middlewares.use((req, _res, next) => {
             if (req.url === '/thank-you') {
               req.url = '/thank-you/';
             }
