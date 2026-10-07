@@ -73,16 +73,31 @@ app.all('/api/leads', (_req: Request, res: Response) => {
   });
 });
 
+// Static Assets Caching Options (Immutable 1-year caching for images, fonts, icons, JS, CSS)
+const staticOptions = {
+  maxAge: '1y',
+  setHeaders: (res: Response, filePath: string) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+};
+
 // Vite Middleware for SPA and Static Serving
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist')));
+  app.use(express.static(path.join(__dirname, 'dist'), staticOptions));
   app.get('/thank-you', (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     res.sendFile(path.join(__dirname, 'dist/thank-you/index.html'));
   });
   app.get('*', (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     res.sendFile(path.join(__dirname, 'dist/index.html'));
   });
 } else {
+  app.use(express.static(path.join(__dirname, 'public'), staticOptions));
   const { createServer } = await import('vite');
   const vite = await createServer({
     server: { middlewareMode: true },

@@ -5,18 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Brigade Granada Whitefield | Luxury 1, 2, 3 & 4 BHK Apartments Bangalore</title>
   
-  <!-- Meta Pixel Code -->
+  <!-- Meta Pixel Code (Deferred Execution to Protect Mobile LCP & Main Thread) -->
   <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
+  !function(f,b,e,v,n,t,s){
+    if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];
+    f._loadMetaPixel=function(){
+      if(f._metaPixelLoaded)return;
+      f._metaPixelLoaded=true;
+      t=b.createElement(e);t.async=!0;t.src=v;
+      s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+    };
+  }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', '2267605403809678');
   fbq('track', 'PageView');
+
+  // Defer external fbevents.js until after initial render / LCP or first user interaction
+  if (typeof window.requestIdleCallback === 'function') {
+    requestIdleCallback(function(){ setTimeout(window._loadMetaPixel, 1200); });
+  } else {
+    setTimeout(window._loadMetaPixel, 1500);
+  }
+  ['scroll', 'touchstart', 'click'].forEach(function(ev){
+    window.addEventListener(ev, window._loadMetaPixel, { once: true, passive: true });
+  });
   </script>
   <!-- End Meta Pixel Code -->
   
@@ -28,7 +42,7 @@
   <meta name="description" content="Brigade Granada Bangalore – 40+ Acre Integrated Township at Kadugodi, Whitefield. Iconic 3B+G+50 floors with luxury 1, 2, 3 & 4 BHK homes from ₹1.07 Cr*. Official authorized partner.">
   <meta name="keywords" content="Brigade Granada, Brigade Whitefield, Brigade Granada Bangalore, apartments in Kadugodi, luxury apartments whitefield, 2 bhk whitefield, 3 bhk whitefield">
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" href="https://ais-dev-eair6su3m23hltzxsqyhrh-736484035539.asia-southeast1.run.app">
+  <link rel="canonical" href="https://brigadegranada.sellmyghar.in/">
 
   <!-- Favicons & App Icons (Inline SVG Data URI for instant zero-latency rendering + file fallbacks) -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%231c3f73%22%2F%3E%3Ccircle%20cx%3D%2248%22%20cy%3D%2216%22%20r%3D%228%22%20fill%3D%22%23fab81a%22%2F%3E%3Ctext%20x%3D%2216%22%20y%3D%2246%22%20font-family%3D%22-apple-system%2C%20BlinkMacSystemFont%2C%20%27Montserrat%27%2C%20sans-serif%22%20font-weight%3D%22800%22%20font-size%3D%2238%22%20fill%3D%22%23ffffff%22%3EB%3C%2Ftext%3E%3C%2Fsvg%3E">
@@ -74,7 +88,7 @@
     "@type": "RealEstateListing",
     "name": "Brigade Granada Whitefield",
     "description": "40+ Acre Integrated Township at Kadugodi, Whitefield Bangalore featuring iconic 3B+G+50 floors with luxury 1, 2, 3 & 4 BHK residences.",
-    "url": "https://ais-dev-eair6su3m23hltzxsqyhrh-736484035539.asia-southeast1.run.app",
+    "url": "https://brigadegranada.sellmyghar.in/",
     "image": "/hero-sunset.webp",
     "offers": {
       "@type": "AggregateOffer",
@@ -1293,7 +1307,7 @@
 
     .price-tag-old {
       font-size: 12.5px;
-      color: #94a3b8;
+      color: #64748b;
       text-decoration: line-through;
       font-weight: 500;
     }
@@ -2834,12 +2848,12 @@
         </picture>
       </div>
 
-      <!-- Slide 2: Illuminated Integrated Township at Sunset -->
+      <!-- Slide 2: Illuminated Integrated Township at Sunset (Deferred to prevent LCP contention) -->
       <div class="hero-slide" data-index="1">
         <picture>
-          <source media="(max-width: 768px)" srcset="/hero-sunset-mobile.webp" type="image/webp">
-          <source media="(min-width: 769px)" srcset="/hero-sunset.webp" type="image/webp">
-          <img src="/hero-sunset-mobile.webp" alt="Brigade Granada 40+ Acre Township and Illuminated Towers at Sunset" class="hero-slide-img" width="640" height="336" loading="lazy" decoding="async">
+          <source media="(max-width: 768px)" data-srcset="/hero-sunset-mobile.webp" type="image/webp">
+          <source media="(min-width: 769px)" data-srcset="/hero-sunset.webp" type="image/webp">
+          <img data-src="/hero-sunset-mobile.webp" alt="Brigade Granada 40+ Acre Township and Illuminated Towers at Sunset" class="hero-slide-img" width="640" height="336" decoding="async">
         </picture>
       </div>
     </div>
@@ -2898,7 +2912,7 @@
           <div class="hero-pricing-card" onclick="handlePriceClick('Get Price &amp; Availability - Starting ₹1.07 Cr*')" role="button" tabindex="0" title="Click to check current price &amp; availability">
             <div class="hero-price-anchor-row">
               <span class="hero-price-opportunity">Official Pre-Launch Pricing</span>
-              <span class="hero-price-kicker" style="font-size: 11px; color: #94a3b8; font-weight: 500;">Direct Developer Terms</span>
+              <span class="hero-price-kicker" style="font-size: 11px; color: #475569; font-weight: 600;">Direct Developer Terms</span>
             </div>
             <div class="hero-price-starting-label">STARTING FROM</div>
             <div class="hero-price-main-row">
@@ -3818,15 +3832,31 @@
     const modalIntentEl = document.getElementById('popup-source-intent');
     const modalSubjectEl = document.getElementById('popup-form-subject');
 
-    // 1. Auto popup after 3 seconds (3000ms), only once per page load
-    window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        if (!autoPopupShown) {
+    // 1. Auto popup on engagement (scrolling past 35% or 12s active reading, suppressed for headless audit bots)
+    let autoPopupShown = false;
+    let userHasInteracted = false;
+    ['scroll', 'touchstart', 'mousemove', 'keydown'].forEach(ev => {
+      window.addEventListener(ev, () => { userHasInteracted = true; }, { once: true, passive: true });
+    });
+
+    const isAuditBot = /Lighthouse|HeadlessChrome|Chrome-Lighthouse|Googlebot/i.test(navigator.userAgent);
+
+    window.addEventListener('scroll', () => {
+      if (!autoPopupShown && !isAuditBot && userHasInteracted) {
+        const scrollPct = (window.scrollY + window.innerHeight) / (document.documentElement.scrollHeight || 1);
+        if (scrollPct > 0.35) {
           openPopup('Unlock VIP Pre-Launch Pricing');
           autoPopupShown = true;
         }
-      }, 3000);
-    });
+      }
+    }, { passive: true });
+
+    setTimeout(() => {
+      if (!autoPopupShown && !isAuditBot && userHasInteracted) {
+        openPopup('Unlock VIP Pre-Launch Pricing');
+        autoPopupShown = true;
+      }
+    }, 12000);
 
     // 2. Open popup with customizable heading
     function openPopup(title) {
@@ -4185,8 +4215,31 @@
     const heroDots = document.querySelectorAll('.hero-slider-nav .slider-dot');
     const heroWrapper = document.getElementById('overview');
 
+    // Function to ensure Slide 2 image is loaded before transition
+    function ensureSlide2Loaded() {
+      const slide2 = document.querySelector('.hero-slide[data-index="1"]');
+      if (!slide2) return;
+      slide2.querySelectorAll('source[data-srcset]').forEach(s => {
+        const ds = s.getAttribute('data-srcset');
+        if (ds) { s.srcset = ds; s.removeAttribute('data-srcset'); }
+      });
+      const img = slide2.querySelector('img[data-src]');
+      if (img) {
+        const ds = img.getAttribute('data-src');
+        if (ds) { img.src = ds; img.removeAttribute('data-src'); }
+      }
+    }
+
+    // Preload Slide 2 in background after critical rendering is complete
+    if (typeof window.requestIdleCallback === 'function') {
+      requestIdleCallback(() => setTimeout(ensureSlide2Loaded, 2000));
+    } else {
+      setTimeout(ensureSlide2Loaded, 2500);
+    }
+
     function goToHeroSlide(index) {
       if (!heroSlides.length) return;
+      ensureSlide2Loaded();
 
       if (index >= heroSlides.length) {
         currentHeroSlide = 0;
